@@ -23,19 +23,68 @@
   h1 { font-size: clamp(22px, 6vw, 30px); margin: 10px 0 8px; }
   .lead { color: #d4dfeb; line-height: 1.7; font-size: 14px; }
   .panel {
-    margin: 26px 0 18px; padding: 26px 18px; border-radius: 22px;
+    margin: 22px 0 16px; padding: 24px 18px; border-radius: 22px;
     background: #243d59; border: 1px solid #49617a;
   }
-  #clock { font-size: clamp(38px, 11vw, 56px); font-weight: 750; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
-  #message { min-height: 48px; margin: 12px 0 0; color: #e6c77a; line-height: 1.6; }
-  button {
-    width: 100%; border: 0; border-radius: 999px; padding: 17px 20px;
-    background: #e6c77a; color: #172b43; font-size: 17px; font-weight: 750;
-    cursor: pointer; margin-top: 8px;
+  .mode-badge {
+    display: inline-block; font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
+    background: #172b43; color: #e6c77a; border: 1px solid #49617a;
   }
-  button:disabled { opacity: .6; cursor: wait; }
+  .mode-badge:empty { display: none; }
+  #clock { font-size: clamp(38px, 11vw, 56px); font-weight: 750; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .rank-title {
+    font-size: clamp(22px, 6.5vw, 28px); font-weight: 800; color: #e6c77a;
+    margin: 8px 0 4px; letter-spacing: .04em;
+  }
+  #message { min-height: 44px; margin: 10px 0 0; color: #e6c77a; line-height: 1.6; font-size: 14px; }
+
+  /* クイズ回答用プルダウン */
+  .quiz-input-area {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid #49617a;
+  }
+  .select-row {
+    display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  select {
+    background: #172b43; color: #fff; border: 2px solid #e6c77a;
+    border-radius: 12px; padding: 10px 14px; font-size: 18px; font-weight: 700;
+    cursor: pointer;
+  }
+  .select-row span { font-size: 16px; font-weight: 700; color: #d4dfeb; }
+
+  /* 結果シェアエリア */
+  .share-area {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid #49617a;
+    display: grid; gap: 10px;
+  }
+  input[type="text"] {
+    width: 100%; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid #607c99; background: #172b43; color: #fff;
+    font-size: 15px; text-align: center;
+  }
+  input[type="text"]::placeholder { color: #8fa3b8; }
+
+  .btn-group { display: grid; gap: 10px; margin-top: 8px; }
+  button {
+    width: 100%; border: 0; border-radius: 999px; padding: 16px 20px;
+    background: #e6c77a; color: #172b43; font-size: 16px; font-weight: 750;
+    cursor: pointer; transition: opacity .15s;
+  }
+  button.secondary {
+    background: transparent; color: #e6c77a; border: 2px solid #e6c77a;
+  }
+  button.replay {
+    background: #243d59; color: #fff; border: 1px solid #607c99;
+    font-size: 14px; padding: 12px 16px;
+  }
+  button.x-share {
+    background: #0f1419; color: #fff; border: 1px solid #536471;
+    font-size: 15px; padding: 14px 18px;
+  }
+  button:disabled { opacity: .5; cursor: wait; }
+  .hidden { display: none !important; }
   .hint { color: #c2cfdd; font-size: 12px; line-height: 1.7; margin-top: 18px; }
-  .answer { font-size: 34px; font-weight: 800; color: #fff; margin-top: 10px; }
   .legend { display: grid; gap: 8px; text-align: left; margin-top: 22px; }
   .legend div { background: #203750; border-radius: 12px; padding: 11px 14px; font-size: 14px; }
   .legend b { color: #e6c77a; display: inline-block; width: 65px; }
@@ -45,14 +94,37 @@
 <main>
   <div class="eyebrow">A VOICE CLOCK</div>
   <h1>DENOCCHI NAEATER</h1>
-  <p class="lead">鳥の声の組み合わせで、今の時刻をお知らせします。</p>
+  <p class="lead">鳥の声の組み合わせで、時刻をお知らせします。</p>
 
   <section class="panel">
+    <div id="modeBadge" class="mode-badge"></div>
     <div id="clock" aria-label="時刻は音声でお知らせします">？？:？？</div>
-    <div id="message" aria-live="polite">ボタンを押して、声から時刻を読み解いてね。</div>
+    <div id="rankTitle" class="rank-title hidden"></div>
+    <div id="message" aria-live="polite">モードを選んで、声から時刻を読み解いてね。</div>
+
+    <!-- クイズ回答フォーム -->
+    <div id="quizInputArea" class="quiz-input-area hidden">
+      <div class="select-row">
+        <select id="hourSelect" aria-label="時間を選択"></select>
+        <span>時</span>
+        <select id="minuteSelect" aria-label="分を選択"></select>
+        <span>分</span>
+      </div>
+      <button id="submitAnswerButton" type="button">この時刻で回答する！</button>
+    </div>
+
+    <!-- クイズ最終結果＆Xシェアフォーム -->
+    <div id="shareArea" class="share-area hidden">
+      <input type="text" id="playerNameInput" maxlength="20" placeholder="あなたの名前を入力（任意）">
+      <button id="xShareButton" class="x-share" type="button">𝕏 称号と結果をXにポストする</button>
+    </div>
   </section>
 
-  <button id="mainButton" type="button">音声で時刻を聴く</button>
+  <div class="btn-group">
+    <button id="nowButton" type="button">今の時刻を聴く</button>
+    <button id="quizButton" class="secondary" type="button">クイズモード（全5問）</button>
+    <button id="replayButton" class="replay hidden" type="button">🔄 同じ時刻をもう一度聴く</button>
+  </div>
 
   <div class="legend">
     <div><b>キジバト</b> 時間（12時間制・0時/12時は12回）</div>
@@ -60,9 +132,8 @@
     <div><b>土鳩</b> 1分単位</div>
   </div>
   <p class="hint">
-    1回目のタップ：タップした瞬間の時刻を、3種類の声で再生。<br>
-    2回目のタップ：そのときの正解時刻を表示します。<br>
-    ※音声の再生中は、最後まで聞いてから答えを表示できます。
+    ・音声の再生中は、最後まで聞いてから操作できます。<br>
+    ・クイズモードは全5問！全問正解で「ほぼトリ」の称号を獲得！
   </p>
 </main>
 
@@ -73,14 +144,49 @@ const files = {
   pigeon: "pigeon.m4a"     // 1分：土鳩
 };
 
-const button = document.getElementById("mainButton");
+const nowButton = document.getElementById("nowButton");
+const quizButton = document.getElementById("quizButton");
+const replayButton = document.getElementById("replayButton");
+const submitAnswerButton = document.getElementById("submitAnswerButton");
+const xShareButton = document.getElementById("xShareButton");
+
 const message = document.getElementById("message");
 const clock = document.getElementById("clock");
+const modeBadge = document.getElementById("modeBadge");
+const rankTitle = document.getElementById("rankTitle");
+const quizInputArea = document.getElementById("quizInputArea");
+const shareArea = document.getElementById("shareArea");
+const hourSelect = document.getElementById("hourSelect");
+const minuteSelect = document.getElementById("minuteSelect");
+const playerNameInput = document.getElementById("playerNameInput");
+
+// プルダウンの選択肢を生成（1〜12時、00〜59分）
+for (let h = 1; h <= 12; h++) {
+  const opt = document.createElement("option");
+  opt.value = h;
+  opt.textContent = String(h).padStart(2, "0");
+  hourSelect.appendChild(opt);
+}
+for (let m = 0; m < 60; m++) {
+  const opt = document.createElement("option");
+  opt.value = m;
+  opt.textContent = String(m).padStart(2, "0");
+  minuteSelect.appendChild(opt);
+}
 
 let audioContext;
 let buffers = {};
-let phase = "ready"; // ready -> playing -> reveal -> ready
-let capturedTime = null;
+let phase = "ready";
+let currentTarget = null; // { hour12, minute, ampm, isQuiz }
+
+// クイズ用状態管理
+const TOTAL_QUESTIONS = 5;
+let quizState = {
+  active: false,
+  currentQuestion: 0,
+  score: 0,
+  lastRank: ""
+};
 
 async function loadSounds() {
   if (Object.keys(buffers).length === 3) return;
@@ -97,14 +203,11 @@ async function loadSounds() {
   }
 }
 
-function makeSequence(date) {
-  let hour = date.getHours() % 12;
-  if (hour === 0) hour = 12; // 0時・12時は12回で表現
-  const minute = date.getMinutes();
+function makeSequence(target) {
   return [
-    { key: "turtleDove", count: hour, label: "キジバト（時間）" },
-    { key: "crow", count: Math.floor(minute / 10), label: "カラス（10分）" },
-    { key: "pigeon", count: minute % 10, label: "土鳩（1分）" }
+    { key: "turtleDove", count: target.hour12 },
+    { key: "crow", count: Math.floor(target.minute / 10) },
+    { key: "pigeon", count: target.minute % 10 }
   ];
 }
 
@@ -129,7 +232,6 @@ async function playSequence(sequence) {
       source.start(startAt);
       startAt += buffer.duration + 0.32;
     }
-    // 音声グループの間に少し長い間を入れる
     startAt += 0.75;
   }
 
@@ -137,47 +239,48 @@ async function playSequence(sequence) {
   await new Promise(resolve => setTimeout(resolve, totalMs + 100));
 }
 
-function formatAnswer(date) {
-  const rawHour = date.getHours();
-  const ampm = rawHour >= 12 ? "PM " : "AM ";
-  const hour12 = rawHour % 12 === 0 ? 12 : rawHour % 12;
-  return ampm + String(hour12).padStart(2, "0") + ":" +
-         String(date.getMinutes()).padStart(2, "0");
+function formatAnswer(target) {
+  const timeStr = String(target.hour12).padStart(2, "0") + ":" +
+                  String(target.minute).padStart(2, "0");
+  return target.isQuiz ? timeStr : (target.ampm + " " + timeStr);
 }
 
-button.addEventListener("click", async () => {
-  if (phase === "ready") {
-    phase = "playing";
-    capturedTime = new Date(); // 1回目のタップ時刻を固定
-    button.disabled = true;
-    clock.textContent = "？？:？？";
-    button.textContent = "音声を再生中…";
-    try {
-      await playSequence(makeSequence(capturedTime));
-      phase = "reveal";
-      message.textContent = "再生終了！もう一度タップすると正解が分かります。";
-      button.textContent = "正解の時間を見る";
-      button.disabled = false;
-    } catch (error) {
-      console.error(error);
-      phase = "ready";
-      message.textContent = "音声を読み込めませんでした。ページを再読み込みしてください。";
-      button.textContent = "もう一度試す";
-      button.disabled = false;
-    }
-  } else if (phase === "reveal") {
-    clock.textContent = formatAnswer(capturedTime);
-    message.textContent = "正解はこちら！もう一度挑戦できます。";
-    button.textContent = "もう一度挑戦する";
-    phase = "reset";
-  } else if (phase === "reset") {
-    phase = "ready";
-    capturedTime = null;
-    clock.textContent = "？？:？？";
-    message.textContent = "ボタンを押して、声から時刻を読み解いてね。";
-    button.textContent = "音声で時刻を聴く";
+function setAllButtonsDisabled(disabled) {
+  nowButton.disabled = disabled;
+  quizButton.disabled = disabled;
+  replayButton.disabled = disabled;
+  submitAnswerButton.disabled = disabled;
+}
+
+function getRankTitle(score) {
+  if (score <= 1) return "まだまだヒトの耳";
+  if (score <= 3) return "鳥類の理解者";
+  return "ほぼトリ";
+}
+
+async function startPlayback(target) {
+  phase = "playing";
+  currentTarget = target;
+  setAllButtonsDisabled(true);
+
+  clock.textContent = "？？:？？";
+  rankTitle.classList.add("hidden");
+  quizInputArea.classList.add("hidden");
+  shareArea.classList.add("hidden");
+  replayButton.classList.add("hidden");
+
+  if (target.isQuiz) {
+    modeBadge.textContent = `クイズモード 第 ${quizState.currentQuestion} / ${TOTAL_QUESTIONS} 問（正解数: ${quizState.score}）`;
+    nowButton.classList.add("hidden");
+    quizButton.classList.remove("hidden");
+    quizButton.textContent = "音声を再生中…";
+  } else {
+    modeBadge.textContent = "現在時刻モード";
+    nowButton.classList.remove("hidden");
+    nowButton.textContent = "音声を再生中…";
+    quizButton.classList.add("hidden");
   }
-});
-</script>
-</body>
-</html>
+
+  try {
+    await playSequence(makeSequence(target));
+    phase = "reveal";
