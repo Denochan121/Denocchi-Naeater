@@ -1,10 +1,175 @@
-A VOICE CLOCK
-VOICE MINUTE REPEATER
-鳥の声の組み合わせで、今の時刻をお知らせします。
-？？:？？
-ボタンを押して、声から時刻を読み解いてね。
-音声で時刻を聴く
-ハト 時間（0時は24回）
-カラス 10分単位
-キジバト 1分単位
-1回目のタップ：タップした瞬間の時刻を、3種類の声で再生。 2回目のタップ：そのときの正解時刻を表示します。 ※音声の再生中は、最後まで聞いてから答えを表示できます。
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#172b43">
+<title>VOICE MINUTE REPEATER</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    padding: 24px 16px; background: #172b43; color: #fff;
+    font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  }
+  main { width: min(100%, 460px); text-align: center; }
+  .eyebrow { color: #e6c77a; letter-spacing: .18em; font-size: 12px; }
+  h1 { font-size: clamp(22px, 6vw, 30px); margin: 10px 0 8px; }
+  .lead { color: #d4dfeb; line-height: 1.7; font-size: 14px; }
+  .panel {
+    margin: 26px 0 18px; padding: 26px 18px; border-radius: 22px;
+    background: #243d59; border: 1px solid #49617a;
+  }
+  #clock { font-size: clamp(48px, 14vw, 68px); font-weight: 750; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  #message { min-height: 48px; margin: 12px 0 0; color: #e6c77a; line-height: 1.6; }
+  button {
+    width: 100%; border: 0; border-radius: 999px; padding: 17px 20px;
+    background: #e6c77a; color: #172b43; font-size: 17px; font-weight: 750;
+    cursor: pointer; margin-top: 8px;
+  }
+  button:disabled { opacity: .6; cursor: wait; }
+  .hint { color: #c2cfdd; font-size: 12px; line-height: 1.7; margin-top: 18px; }
+  .answer { font-size: 34px; font-weight: 800; color: #fff; margin-top: 10px; }
+  .legend { display: grid; gap: 8px; text-align: left; margin-top: 22px; }
+  .legend div { background: #203750; border-radius: 12px; padding: 11px 14px; font-size: 14px; }
+  .legend b { color: #e6c77a; display: inline-block; width: 26px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">A VOICE CLOCK</div>
+  <h1>VOICE MINUTE REPEATER</h1>
+  <p class="lead">鳥の声の組み合わせで、今の時刻をお知らせします。</p>
+
+  <section class="panel">
+    <div id="clock" aria-label="時刻は音声でお知らせします">？？:？？</div>
+    <div id="message" aria-live="polite">ボタンを押して、声から時刻を読み解いてね。</div>
+  </section>
+
+  <button id="mainButton" type="button">音声で時刻を聴く</button>
+
+  <div class="legend">
+    <div><b>ハト</b> 時間（0時は24回）</div>
+    <div><b>カラス</b> 10分単位</div>
+    <div><b>キジバト</b> 1分単位</div>
+  </div>
+  <p class="hint">
+    1回目のタップ：タップした瞬間の時刻を、3種類の声で再生。<br>
+    2回目のタップ：そのときの正解時刻を表示します。<br>
+    ※音声の再生中は、最後まで聞いてから答えを表示できます。
+  </p>
+</main>
+
+<script>
+const files = {
+  pigeon: "pigeon.m4a",       // 時間：ハト
+  crow: "crow.m4a",           // 10分：カラス
+  turtleDove: "kijibato.m4a"  // 1分：キジバト
+};
+
+const button = document.getElementById("mainButton");
+const message = document.getElementById("message");
+const clock = document.getElementById("clock");
+
+let audioContext;
+let buffers = {};
+let phase = "ready"; // ready -> playing -> reveal -> ready
+let capturedTime = null;
+
+async function loadSounds() {
+  if (Object.keys(buffers).length === 3) return;
+  message.textContent = "音声を準備しています…";
+  audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+  await audioContext.resume();
+
+  const entries = Object.entries(files);
+  for (const [key, filename] of entries) {
+    const response = await fetch(filename);
+    if (!response.ok) throw new Error(filename + " を読み込めません");
+    const data = await response.arrayBuffer();
+    buffers[key] = await audioContext.decodeAudioData(data);
+  }
+}
+
+function makeSequence(date) {
+  let hour = date.getHours();
+  if (hour === 0) hour = 24; // 0時はハト24回で表現
+  const minute = date.getMinutes();
+  return [
+    { key: "pigeon", count: hour, label: "ハト（時間）" },
+    { key: "crow", count: Math.floor(minute / 10), label: "カラス（10分）" },
+    { key: "turtleDove", count: minute % 10, label: "キジバト（1分）" }
+  ];
+}
+
+async function playSequence(sequence) {
+  await loadSounds();
+  let startAt = audioContext.currentTime + 0.15;
+
+  for (let groupIndex = 0; groupIndex < sequence.length; groupIndex++) {
+    const group = sequence[groupIndex];
+    const buffer = buffers[group.key];
+
+    if (group.count === 0) {
+      message.textContent = group.label + "：0回（鳴りません）";
+      startAt += 0.55;
+      continue;
+    }
+
+    for (let i = 0; i < group.count; i++) {
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start(startAt);
+      startAt += buffer.duration + 0.32;
+    }
+    message.textContent = group.label + "：" + group.count + "回";
+    // 音声グループの間に少し長い間を入れる
+    startAt += 0.75;
+  }
+
+  const totalMs = Math.max(0, (startAt - audioContext.currentTime) * 1000);
+  await new Promise(resolve => setTimeout(resolve, totalMs + 100));
+}
+
+function formatAnswer(date) {
+  return String(date.getHours()).padStart(2, "0") + ":" +
+         String(date.getMinutes()).padStart(2, "0");
+}
+
+button.addEventListener("click", async () => {
+  if (phase === "ready") {
+    phase = "playing";
+    capturedTime = new Date(); // 1回目のタップ時刻を固定
+    button.disabled = true;
+    clock.textContent = "？？:？？";
+    button.textContent = "音声を再生中…";
+    try {
+      await playSequence(makeSequence(capturedTime));
+      phase = "reveal";
+      message.textContent = "再生終了！もう一度タップすると正解が分かります。";
+      button.textContent = "正解の時間を見る";
+      button.disabled = false;
+    } catch (error) {
+      console.error(error);
+      phase = "ready";
+      message.textContent = "音声を読み込めませんでした。ページを再読み込みしてください。";
+      button.textContent = "もう一度試す";
+      button.disabled = false;
+    }
+  } else if (phase === "reveal") {
+    clock.textContent = formatAnswer(capturedTime);
+    message.textContent = "正解はこちら！もう一度挑戦できます。";
+    button.textContent = "もう一度挑戦する";
+    phase = "reset";
+  } else if (phase === "reset") {
+    phase = "ready";
+    capturedTime = null;
+    clock.textContent = "？？:？？";
+    message.textContent = "ボタンを押して、声から時刻を読み解いてね。";
+    button.textContent = "音声で時刻を聴く";
+  }
+});
+</script>
+</body>
+</html>
