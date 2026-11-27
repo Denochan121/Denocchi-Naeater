@@ -1,3 +1,4 @@
+<!-- === PART 1 START === -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -126,6 +127,8 @@
     ・クイズモードは全5問！全問正解で「ほぼトリ」の称号を獲得！
   </p>
 </main>
+<!-- === PART 1 END === -->
+<!-- === PART 2 START === -->
 <script>
 const files = {
   turtleDove: "dove.m4a",
@@ -243,7 +246,8 @@ function getRankTitle(score) {
   if (score <= 3) return "鳥類の理解者";
   return "ほぼトリ";
 }
-
+// === PART 2 END ===
+// === PART 3 START ===
 async function startPlayback(target) {
   phase = "playing";
   currentTarget = target;
@@ -417,3 +421,4 @@ xShareButton.addEventListener("click", () => {
 </script>
 </body>
 </html>
+<!-- === PART 3 END === -->
