@@ -110,9 +110,9 @@
 
     <div id="shareArea" class="share-area hidden">
       <input type="text" id="playerNameInput" maxlength="20" placeholder="あなたの名前を入力（任意）">
-      <a id="xShareButton" class="x-share-btn" href="https://x.com" target="_blank" rel="noopener noreferrer">𝕏 称号と結果をXにポストする</a>
+      <button id="xShareButton" class="x-share-btn" type="button">𝕏 称号と結果をXにポストする</button>
     </div>
-  </section>
+
 
   <div class="btn-group">
     <button id="nowButton" type="button">今の時刻を聴く</button>
@@ -407,10 +407,10 @@ replayButton.addEventListener("click", async () => {
   }
 });
 
-function updateShareLink() {
+xShareButton.addEventListener("click", () => {
   const rawName = playerNameInput.value.trim();
   const playerName = rawName ? rawName : "名無しの聴き手";
-  const shareUrl = "https://github.io";
+  const shareUrl = "https://denochan121.github.io/Denocchi-Naeater/";
   const postText =
     playerName + " の鳥時計クイズ結果（全" + TOTAL_QUESTIONS + "問）\n" +
     "正解数：" + quizState.score + "問正解\n" +
@@ -418,11 +418,14 @@ function updateShareLink() {
     "鳥の鳴き声だけで今の時刻がわかるかな？\n" +
     "#DENOCCHINAEATER #ミニッツリピーター\n";
 
-  xShareButton.href = "https://x.com" +
+  const intentUrl = "https://x.com" +
     encodeURIComponent(postText) + "&url=" + encodeURIComponent(shareUrl);
-}
-playerNameInput.addEventListener("input", updateShareLink);
-xShareButton.addEventListener("click", updateShareLink);
+  
+  const win = window.open(intentUrl, "_blank");
+  if (!win) {
+    window.location.assign(intentUrl);
+  }
+});
 </script>
 </body>
 </html>
