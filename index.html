@@ -26,7 +26,7 @@
     margin: 26px 0 18px; padding: 26px 18px; border-radius: 22px;
     background: #243d59; border: 1px solid #49617a;
   }
-  #clock { font-size: clamp(48px, 14vw, 68px); font-weight: 750; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  #clock { font-size: clamp(38px, 11vw, 56px); font-weight: 750; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
   #message { min-height: 48px; margin: 12px 0 0; color: #e6c77a; line-height: 1.6; }
   button {
     width: 100%; border: 0; border-radius: 999px; padding: 17px 20px;
@@ -55,7 +55,7 @@
   <button id="mainButton" type="button">音声で時刻を聴く</button>
 
   <div class="legend">
-    <div><b>キジバト</b> 時間（0時は24回）</div>
+    <div><b>キジバト</b> 時間（12時間制・0時/12時は12回）</div>
     <div><b>カラス</b> 10分単位</div>
     <div><b>土鳩</b> 1分単位</div>
   </div>
@@ -98,8 +98,8 @@ async function loadSounds() {
 }
 
 function makeSequence(date) {
-  let hour = date.getHours();
-  if (hour === 0) hour = 24; // 0時は24回で表現
+  let hour = date.getHours() % 12;
+  if (hour === 0) hour = 12; // 0時・12時は12回で表現
   const minute = date.getMinutes();
   return [
     { key: "turtleDove", count: hour, label: "キジバト（時間）" },
@@ -139,7 +139,10 @@ async function playSequence(sequence) {
 }
 
 function formatAnswer(date) {
-  return String(date.getHours()).padStart(2, "0") + ":" +
+  const rawHour = date.getHours();
+  const ampm = rawHour >= 12 ? "PM " : "AM ";
+  const hour12 = rawHour % 12 === 0 ? 12 : rawHour % 12;
+  return ampm + String(hour12).padStart(2, "0") + ":" +
          String(date.getMinutes()).padStart(2, "0");
 }
 
