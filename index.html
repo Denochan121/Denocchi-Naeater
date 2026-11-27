@@ -7,7 +7,8 @@
 <title>VOICE MINUTE REPEATER</title>
 <meta property="og:title" content="VOICE MINUTE REPEATER">
 <meta property="og:description" content="鳥の声で時刻をお知らせするミニッツリピーター">
-<meta property="og:image" content="https://raw.githubusercontent.com/Denochan121/Voice-repeater/main/thumbnail.jpg">
+<meta property="og:url" content="https://github.io">
+<meta property="og:image" content="https://github.iothumbnail.jpg.JPG">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
  <style>
@@ -37,7 +38,7 @@
   .answer { font-size: 34px; font-weight: 800; color: #fff; margin-top: 10px; }
   .legend { display: grid; gap: 8px; text-align: left; margin-top: 22px; }
   .legend div { background: #203750; border-radius: 12px; padding: 11px 14px; font-size: 14px; }
-  .legend b { color: #e6c77a; display: inline-block; width: 26px; }
+  .legend b { color: #e6c77a; display: inline-block; width: 65px; }
 </style>
 </head>
 <body>
@@ -54,9 +55,9 @@
   <button id="mainButton" type="button">音声で時刻を聴く</button>
 
   <div class="legend">
-    <div><b>土鳩</b> 時間（0時は24回）</div>
+    <div><b>キジバト</b> 時間（0時は24回）</div>
     <div><b>カラス</b> 10分単位</div>
-    <div><b>キジバト</b> 1分単位</div>
+    <div><b>土鳩</b> 1分単位</div>
   </div>
   <p class="hint">
     1回目のタップ：タップした瞬間の時刻を、3種類の声で再生。<br>
@@ -67,9 +68,9 @@
 
 <script>
 const files = {
-  pigeon: "pigeon.m4a",       // 時間：ハト
-  crow: "crow.m4a",           // 10分：カラス
-  turtleDove: "dove.m4a"  // 1分：キジバト
+  turtleDove: "dove.m4a",  // 時間：キジバト
+  crow: "crow.m4a",        // 10分：カラス
+  pigeon: "pigeon.m4a"     // 1分：土鳩
 };
 
 const button = document.getElementById("mainButton");
@@ -98,12 +99,12 @@ async function loadSounds() {
 
 function makeSequence(date) {
   let hour = date.getHours();
-  if (hour === 0) hour = 24; // 0時はハト24回で表現
+  if (hour === 0) hour = 24; // 0時は24回で表現
   const minute = date.getMinutes();
   return [
-    { key: "pigeon", count: hour, label: "ハト（時間）" },
+    { key: "turtleDove", count: hour, label: "キジバト（時間）" },
     { key: "crow", count: Math.floor(minute / 10), label: "カラス（10分）" },
-    { key: "turtleDove", count: minute % 10, label: "キジバト（1分）" }
+    { key: "pigeon", count: minute % 10, label: "土鳩（1分）" }
   ];
 }
 
