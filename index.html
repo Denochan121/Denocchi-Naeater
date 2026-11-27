@@ -110,8 +110,9 @@
 
     <div id="shareArea" class="share-area hidden">
       <input type="text" id="playerNameInput" maxlength="20" placeholder="あなたの名前を入力（任意）">
-      <button id="xShareButton" class="x-share-btn" type="button">𝕏 称号と結果をXにポストする</button>
+      <button id="xShareButton" class="x-share-btn" type="button">📋 結果をコピーしてXにポストする</button>
     </div>
+
 
 
   <div class="btn-group">
@@ -407,25 +408,27 @@ replayButton.addEventListener("click", async () => {
   }
 });
 
-xShareButton.addEventListener("click", () => {
+xShareButton.addEventListener("click", async () => {
   const rawName = playerNameInput.value.trim();
   const playerName = rawName ? rawName : "名無しの聴き手";
-  const shareUrl = "https://denochan121.github.io/Denocchi-Naeater/";
+  const shareUrl = "https://github.io";
   const postText =
     playerName + " の鳥時計クイズ結果（全" + TOTAL_QUESTIONS + "問）\n" +
     "正解数：" + quizState.score + "問正解\n" +
     "称号：【" + quizState.lastRank + "】\n\n" +
     "鳥の鳴き声だけで今の時刻がわかるかな？\n" +
-    "#DENOCCHINAEATER #ミニッツリピーター\n";
+    "#DENOCCHINAEATER #ミニッツリピーター\n" +
+    shareUrl;
 
-  const intentUrl = "https://x.com" +
-    encodeURIComponent(postText) + "&url=" + encodeURIComponent(shareUrl);
-  
-  const win = window.open(intentUrl, "_blank");
-  if (!win) {
-    window.location.assign(intentUrl);
+  try {
+    await navigator.clipboard.writeText(postText);
+    xShareButton.textContent = "✅ コピー完了！Xを開いて貼り付けてね";
+    message.textContent = "投稿文をコピーしました！Xの投稿画面に貼り付けてポストしてね。";
+  } catch (err) {
+    prompt("以下の文章をコピーしてXにポストしてね！", postText);
   }
 });
+
 </script>
 </body>
 </html>
