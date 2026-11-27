@@ -1,4 +1,4 @@
-<!-- === 1/4 START === -->
+<!-- === PART 1 / 4 START === -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -71,10 +71,9 @@
     background: #243d59; color: #fff; border: 1px solid #607c99;
     font-size: 14px; padding: 12px 16px;
   }
-  .x-share-btn {
-    display: block; width: 100%; background: #0f1419; color: #fff;
-    border: 1px solid #536471; border-radius: 999px; font-size: 15px;
-    font-weight: 750; padding: 14px 18px; text-decoration: none; cursor: pointer;
+  button.x-share-btn {
+    background: #0f1419; color: #fff; border: 1px solid #536471;
+    font-size: 15px; padding: 14px 18px;
   }
   button:disabled { opacity: .5; cursor: wait; }
   .hidden { display: none !important; }
@@ -84,8 +83,7 @@
   .legend b { color: #e6c77a; display: inline-block; width: 65px; }
 </style>
 </head>
-<!-- === 1/4 END === -->
-<!-- === 2/4 START === -->
+<!-- === PART 1 / 4 END === -->
 <body>
 <main>
   <div class="eyebrow">A VOICE CLOCK</div>
@@ -107,13 +105,11 @@
       </div>
       <button id="submitAnswerButton" type="button">この時刻で回答する！</button>
     </div>
-
     <div id="shareArea" class="share-area hidden">
       <input type="text" id="playerNameInput" maxlength="20" placeholder="あなたの名前を入力（任意）">
       <button id="xShareButton" class="x-share-btn" type="button">📋 結果をコピーしてXにポストする</button>
     </div>
-
-
+  </section>
 
   <div class="btn-group">
     <button id="nowButton" type="button">今の時刻を聴く</button>
@@ -131,8 +127,7 @@
     ・クイズモードは全5問！全問正解で「ほぼトリ」の称号を獲得！
   </p>
 </main>
-<!-- === 2/4 END === -->
-<!-- === 3/4 START === -->
+<!-- === PART 3 / 4 START === -->
 <script>
 const files = {
   turtleDove: "dove.m4a",
@@ -250,8 +245,8 @@ function getRankTitle(score) {
   if (score <= 3) return "鳥類の理解者";
   return "ほぼトリ";
 }
-// === 3/4 END ===
-<!-- === 4/4 START === -->
+// === PART 3 / 4 END ===
+<!-- === PART 4 / 4 START === -->
 async function startPlayback(target) {
   phase = "playing";
   currentTarget = target;
@@ -386,7 +381,6 @@ submitAnswerButton.addEventListener("click", () => {
       ? "最終問題も大正解（" + answerText + "）！あなたの耳のランクはこちら！"
       : "最終問題の正解は " + answerText + " でした。あなたの耳のランクはこちら！";
 
-    updateShareLink();
     shareArea.classList.remove("hidden");
     nowButton.textContent = "今の時刻を聴く";
     nowButton.classList.remove("hidden");
@@ -428,8 +422,7 @@ xShareButton.addEventListener("click", async () => {
     prompt("以下の文章をコピーしてXにポストしてね！", postText);
   }
 });
-
 </script>
 </body>
 </html>
-<!-- === 4/4 END === -->
+<!-- === PART 4 / 4 END === -->
