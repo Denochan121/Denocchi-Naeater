@@ -110,6 +110,7 @@ function makeSequence(date) {
 
 async function playSequence(sequence) {
   await loadSounds();
+  message.textContent = "耳を澄ませて、鳴き声の回数を数えてね…";
   let startAt = audioContext.currentTime + 0.15;
 
   for (let groupIndex = 0; groupIndex < sequence.length; groupIndex++) {
@@ -117,7 +118,6 @@ async function playSequence(sequence) {
     const buffer = buffers[group.key];
 
     if (group.count === 0) {
-      message.textContent = group.label + "：0回（鳴りません）";
       startAt += 0.55;
       continue;
     }
@@ -129,7 +129,6 @@ async function playSequence(sequence) {
       source.start(startAt);
       startAt += buffer.duration + 0.32;
     }
-    message.textContent = group.label + "：" + group.count + "回";
     // 音声グループの間に少し長い間を入れる
     startAt += 0.75;
   }
