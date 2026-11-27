@@ -402,7 +402,6 @@ replayButton.addEventListener("click", async () => {
     phase = "answered";
   }
 });
-
 xShareButton.addEventListener("click", () => {
   const rawName = playerNameInput.value.trim();
   const playerName = rawName ? rawName : "名無しの聴き手";
@@ -414,11 +413,10 @@ xShareButton.addEventListener("click", () => {
     "鳥の鳴き声だけで今の時刻がわかるかな？\n" +
     "#DENOCCHINAEATER #ミニッツリピーター\n";
 
-  const intentUrl = "https://twitter.com" +
+  const intentUrl = "https://x.com" +
     encodeURIComponent(postText) + "&url=" + encodeURIComponent(shareUrl);
-  window.open(intentUrl, "_blank", "noopener,noreferrer");
+  window.location.href = intentUrl;
 });
 </script>
 </body>
 </html>
-<!-- === PART 3 END === -->
